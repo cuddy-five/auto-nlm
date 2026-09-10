@@ -1,14 +1,10 @@
-# prompts/ (examples only)
+# prompts/
 
-Runtime prompt building lives in:
+This folder is the product after the 2026-09-10 pivot.
 
-- `operators/` — named Lego pieces
-- `assembler/` — stacks pieces into a string
-- `gates/` — checks the string before `nlm` runs
+| File | Job |
+|---|---|
+| `scout.md` | Instructions for the LLM: how to call Tavily dynamic search, Tavily deep research, or Firecrawl |
+| `compose-nlm-research.md` | Instructions for the LLM: how to turn scout results into a NotebookLM Deep Research prompt |
 
-Files here are **examples and docs**, not the engine. Prefer adding an operator over adding a new filled template.
-
-## Roadmap
-
-- **Now (B+D):** operators + assembler + prompt gate
-- **Later (E):** assembler also reads session state (gaps, entities seen, failed sources) when building the next prompt
+Do not treat leftover “operator / recipe format” notes as the engine. See `docs/OUTLINE.md`.

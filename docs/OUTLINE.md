@@ -22,7 +22,7 @@ If you are an agent (or a human) trying to understand the project, **read this f
 
 ## One-sentence goal
 
-Build an agent skill that writes **strong NotebookLM Deep Research prompts** (and optional Studio focus prompts) so notebooks are fully sourced and well configured — not a vault/Obsidian exporter.
+A **high-quality LLM** scouts the web with Tavily and/or Firecrawl, then writes a **pointed Google NotebookLM Deep Research prompt**. We ship the **LLM prompts** that make that handoff good.
 
 ---
 
@@ -30,69 +30,59 @@ Build an agent skill that writes **strong NotebookLM Deep Research prompts** (an
 
 | In scope now | Out of scope (for now) |
 |---|---|
-| Scope a topic with user checkpoints | Obsidian / Zettelkasten / vault writeback |
-| Pre-research the web to gather specifics for prompts | Full autopilot with no user gates |
-| Assemble Deep Research + Studio prompts | Replacing NotebookLM’s own Deep Research |
-| Gate prompts before calling `nlm` | Spec-compiler mini-language (deferred) |
-| Optional Studio artifacts (slides, audio, flashcards, …) | |
+| User query → LLM + web tools | Operator algebra / assembler / Python FactPack engine |
+| Tavily dynamic search **or** Tavily deep research **or** Firecrawl | LangChain / LangGraph |
+| LLM writes the NotebookLM Deep Research prompt from tool results | Obsidian / vault writeback |
+| Engineered LLM instructions (the skill’s real product) | Replacing NotebookLM Deep Research itself |
+| Optional Studio later | |
 
-Deliverable the user cares about: a **good NotebookLM notebook** (+ optional Studio outputs).
-
----
-
-## Prompt engine (locked direction)
-
-- **B — Operators (now):** small named pieces snapped into a stack; an assembler turns the stack into the string sent to `nlm`.
-- **D — Prompt gate (now):** score/rewrite the draft prompt against a rubric **before** any `nlm` call.
-- **E — State-conditioned (later):** later prompts use session state (gaps, entities seen, weak claims, failed sources).
-- **Not v1:** fill-in-the-blank `{{slot}}` templates as the engine; notebook-spec compiler language.
-
-Pre-research output becomes **inputs to operators** (and later fuel for E).
+Deliverable: a **good NotebookLM Deep Research prompt** (then a good notebook). The scout is in service of that prompt.
 
 ---
 
-## Pre-research (scout)
+## Architecture (locked 2026-09-10 — hard pivot)
 
-**Tools (planned, not installed until approved):**
+```
+User query
+    → high-quality LLM (guided by our prompts)
+    → tools: Tavily dynamic search | Tavily deep research | Firecrawl
+    → LLM reads tool results
+    → LLM writes NotebookLM Deep Research prompt
+    → (later) nlm runs that prompt
+```
 
-- **Tavily** — web research / discovery (what exists, names, links, open questions).
-- **Firecrawl** — fetch a **small top-N** of those URLs for deeper text (not crawl-everything).
+We **engineer two instruction layers** (maybe more later):
 
-**Timing (working default):** after **CP0** (scope approved), before NotebookLM harvest.
+1. **Scout prompt** — when to pick dynamic search vs Tavily deep research vs Firecrawl, and how to query them.
+2. **Composer prompt** — how to turn scout results into a NotebookLM Deep Research prompt (named entities, include/exclude, seeds, job shape, citation rules).
 
-**Job:** build a short “fact pack” (entities, seed URLs/docs, terms, exclusions, open questions) so Deep Research prompts are pointed.
+**Dropped:** Lego operators, assembler, code prompt-gate, FactPack-as-runtime. Those were a previous design.
 
-Pre-research does **not** replace Deep Research. It makes *our* prompts specific.
+**Still true from the old skill:** checkpoints are allowed if we want a human look at the composed NLM prompt before it runs; named entities and source controls still belong *inside* the composer prompt; Obsidian stays out.
 
 ---
 
 ## Phase map (working)
 
-| Phase | Name | Notes |
+| Phase | Name | Who |
 |---|---|---|
-| 0 | Scope | User approves 4–7 sub-topics (**CP0**) |
-| 0.5 | Pre-research | Tavily → top-N Firecrawl → fact pack |
-| 1 | Notebook | Create/name notebook in `nlm` |
-| 2 | Harvest | Operators + gate → Deep Research; prefer seeds + include/exclude controls |
-| 2b | Vet | Clean unreliable / duplicate / inaccessible sources |
-| 3 | Interrogate | Multi-pass queries; ACG (Analyze / Challenge / Gap) over time |
-| 4 | Artifacts (optional) | Studio `--focus` via studio operators + gate |
-| 5 | Done | Checklist |
-
-Checkpoints stay. No skipping CP0.
+| 1 | User query | Human |
+| 2 | Scout | LLM + Tavily and/or Firecrawl |
+| 3 | Compose | LLM writes NotebookLM Deep Research prompt |
+| 4 | (optional) Human review of that prompt | Human |
+| 5 | Harvest | `nlm` Deep Research |
+| 6 | Later | Vet sources, Studio, etc. |
 
 ---
 
-## Deep Research prompt lessons (from scout research)
+## Deep Research lessons (feed the **composer** prompt)
 
-Steal these into operators / gates (not as one giant static prompt):
-
-1. Seed trusted sources before big runs when possible.
+1. Seed trusted sources when we have them.
 2. Explicit Sources include/exclude (and scope) control lines.
-3. ACG loop: Analyze → Challenge → Gap → focused re-run.
-4. Post-harvest vetting (“remove bad/duplicate; don’t invent metadata”).
-5. Citation asks that match NotebookLM (filename + page for files; full URL for web).
-6. Job-shaped prompts (survey vs narrow empirical vs lit review vs market vs code).
+3. ACG later (Analyze / Challenge / Gap) — not required for first composer slice.
+4. Post-harvest vetting — later.
+5. Citation asks NotebookLM understands (filename + page; URL for web).
+6. Job-shaped prompts (survey vs narrow vs lit review vs market vs code).
 
 ---
 
@@ -100,37 +90,35 @@ Steal these into operators / gates (not as one giant static prompt):
 
 ```
 auto-nlm/
-  README.md                 # human 60-second story (living)
-  SKILL.md                  # thin router for agents using the skill
-  docs/
-    OUTLINE.md              # THIS FILE — project map for humans + agents
-  operators/                # B — named Lego pieces (to build)
-  assembler/                # B — stack → prompt string (to build)
-  gates/                    # D — prompt (and later answer) rubrics (to build)
-  prompts/                  # examples/docs only — not the runtime engine
-  # pre-research client code — only after deps approved
+  README.md
+  SKILL.md                 # router + never-list; points at prompt files
+  AGENTS.md
+  docs/OUTLINE.md          # THIS FILE
+  docs/OLD_FLOW.md         # original nlm-deep-dive (why we started)
+  prompts/
+    scout.md               # LLM: how to call Tavily / Firecrawl
+    compose-nlm-research.md  # LLM: how to write the NLM Deep Research prompt
 ```
+
+No `operators/` / `assembler/` / `gates/` unless we revive them on purpose and update this file.
 
 ---
 
 ## Build order (for now)
 
-1. README + this outline + thin `SKILL.md` aligned to B+D+E-later + pre-research
-2. First research operators + assembler stub + tests
-3. Prompt-gate rubric + tests
-4. Wire pre-research (after user approves Tavily/Firecrawl deps)
-5. Harvest + vet prompts against real `nlm`
-6. Interrogation operators; then E (state) when we have session data
-7. Studio operators
-8. Install path + CI
+1. This outline + AGENTS + thin SKILL aligned to the LLM pipeline
+2. Draft `prompts/scout.md` and `prompts/compose-nlm-research.md` (the product)
+3. Wire Tavily/Firecrawl only after the user approves deps
+4. Run against real `nlm`
+5. Optional: human review checkpoint, vet, Studio
 
 ---
 
 ## Open questions
 
-- Exact Tavily/Firecrawl APIs and auth setup (blocked on user approving deps).
-- Top-N size for Firecrawl (recommendation: small, e.g. 3–8 URLs per sub-topic).
-- Whether seed uploads into NotebookLM are automated via `nlm` or manual at first.
+- Which “high-quality LLM” in production (host agent vs a named API).
+- When the scout should pick Tavily **dynamic search** vs Tavily **deep research** vs Firecrawl.
+- Whether the human must approve the composed NLM prompt before `nlm` runs (recommended: yes).
 
 ---
 
@@ -138,4 +126,5 @@ auto-nlm/
 
 | Date | Change |
 |---|---|
-| 2026-09-10 | Initial outline: B+D now, E later, pre-research after CP0, no Obsidian, Deep Research lessons captured |
+| 2026-09-10 | Initial outline: B+D now, E later, pre-research after CP0, no Obsidian |
+| 2026-09-10 | **Hard pivot:** LLM + Tavily/Firecrawl scout → LLM composes NotebookLM Deep Research prompt. Operators/assembler/gates dropped as the engine. Product is engineered LLM prompts. |

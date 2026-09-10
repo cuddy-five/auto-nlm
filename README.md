@@ -12,44 +12,32 @@ Left alone, an agent asks NotebookLM one broad question, accepts the first fluen
 
 ## Approach
 
-Keep the human at a few checkpoints. Everything else is orchestration around better prompts:
+1. User asks a research question.
+2. A high-quality LLM scouts the web with **Tavily** (dynamic search or deep research) and/or **Firecrawl**.
+3. That same LLM writes a **pointed NotebookLM Deep Research prompt** from what it found.
+4. We run that prompt through NotebookLM (`nlm`). Studio artifacts can come later.
 
-1. **Scope** — decompose the topic into concrete sub-topics (approve before any `nlm` call).
-2. **Harvest** — named-entity deep research into a fresh notebook; curate sources instead of hoping.
-3. **Interrogate** — structured multi-pass queries per sub-topic, with a thin quality gate and retries.
-4. **Artifacts (optional)** — Studio focus prompts tuned per format (slides ≠ audio ≠ flashcards).
+Our work is **engineering those LLM prompts**, not a Python operator framework.
 
-Obsidian / vault export is **out of scope** for this repo’s first life. The notebook *is* the deliverable.
-
-## Design bets (why this can be better than the prototype)
-
-| Old prototype habit | Rebuild direction |
-|---|---|
-| ~18KB `SKILL.md` loaded every turn | Thin router skill; load only the prompt file for the current phase |
-| Static prompt blobs | Prompt recipes with slots (topic, entities, sub-topic, gaps from prior passes) |
-| Vault synthesis as the finish line | Notebook quality + optional Studio bundle as the finish line |
-| All passes described inline | Pass index in the skill; bodies live under `prompts/` and are read on demand |
-| Highest leverage already known | Studio `--focus` prompts and research queries get the most design energy |
+Obsidian / vault export is **out of scope**. The notebook is the deliverable.
 
 ## Project map
 
-Agents and humans: start at [`docs/OUTLINE.md`](docs/OUTLINE.md). Update it when the plan changes.
+Agents and humans: start at [`docs/OUTLINE.md`](docs/OUTLINE.md). Update it when the plan changes. [`docs/OLD_FLOW.md`](docs/OLD_FLOW.md) is the original skill.
 
 ## Status
 
-**Rebuilding.**
+**Rebuilding (LLM scout → compose pipeline).**
 
-- [ ] Rewrite README to this framing *(this file)*
-- [ ] Thin `SKILL.md` router (never-list + phase map + which file to open)
-- [ ] Prompt recipe format + research / query / studio libraries
-- [ ] Notebook lifecycle + source harvest loop
-- [ ] Quality gate (small, testable)
-- [ ] Optional Studio artifact step
-- [ ] Install path + CI
+- [x] Living outline + AGENTS entry
+- [ ] `prompts/scout.md` and `prompts/compose-nlm-research.md`
+- [ ] Wire Tavily/Firecrawl (after approval)
+- [ ] Run through real `nlm`
+- [ ] Optional Studio
 
 ## Who it's for
 
-People who want NotebookLM notebooks that are sourced and configured on purpose — especially if they use agent CLIs and care about prompt quality.
+People who want NotebookLM notebooks that are sourced on purpose — especially if they use agent CLIs and care about prompt quality.
 
 ## License
 
