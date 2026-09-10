@@ -53,12 +53,44 @@ User query
 
 We **engineer two instruction layers** (maybe more later):
 
-1. **Scout prompt** — when to pick dynamic search vs Tavily deep research vs Firecrawl, and how to query them.
-2. **Composer prompt** — how to turn scout results into a NotebookLM Deep Research prompt (named entities, include/exclude, seeds, job shape, citation rules).
+1. **Scout prompt** — classify the *kind* of ask (topic-agnostic), write a Tavily/Firecrawl brief that asks for a small learning map, pick tools. Does **not** invent the sub-topic names.
+2. **Composer prompt** — read the scout report (now the map exists), write the NotebookLM Deep Research prompt.
 
 **Dropped:** Lego operators, assembler, code prompt-gate, FactPack-as-runtime. Those were a previous design.
 
-**Still true from the old skill:** checkpoints are allowed if we want a human look at the composed NLM prompt before it runs; named entities and source controls still belong *inside* the composer prompt; Obsidian stays out.
+**Still true from the old skill:** human can review the composed NLM prompt before `nlm`; named entities and source controls belong *inside* the composer prompt; Obsidian stays out.
+
+---
+
+## Sub-topics come from the scout (locked)
+
+The host LLM must **not** invent 5–7 sub-topics for an arbitrary query. That is guessing from training data (the mushy-outline trap).
+
+| Who | Knows | Does not know |
+|---|---|---|
+| Host LLM | How to ask for a map; *kind* of question | What the map’s parts are named |
+| Tavily (scout) | What the web treats as the parts of this topic | Your NotebookLM prompt |
+
+**5–7 is a budget** (“small learning map”), not a list the model invents.
+
+**Topic-agnostic ask kinds** (property of the sentence, not the domain):
+
+- learn / how does X work → mechanisms, in learning order
+- X vs Y → comparison axes
+- what’s going on with X → timeline / players / stakes
+- is X true / does X work → claims, evidence, limits
+
+**Same scout ask every time (idea):** decompose into 5–7 *fundamental* sub-topics for this kind of question — parts you’d need to understand or decide — not products, news, or listicles. Tavily fills in the names. Trim if it returns 4 or 8.
+
+**Pipe:**
+
+1. User query  
+2. Host LLM → Tavily brief only (kind + budget + source prefs). No “transformers, backprop, …” yet.  
+3. Tavily → report whose headings *are* the sub-topics  
+4. Host LLM reads report → now knows the map  
+5. Host LLM writes NotebookLM Deep Research prompt from that map  
+
+If the map is wrong (touristy, missing a core part), **edit after the scout** (or one follow-up search). Do not make the first LLM omniscient.
 
 ---
 
@@ -67,11 +99,13 @@ We **engineer two instruction layers** (maybe more later):
 | Phase | Name | Who |
 |---|---|---|
 | 1 | User query | Human |
-| 2 | Scout | LLM + Tavily and/or Firecrawl |
-| 3 | Compose | LLM writes NotebookLM Deep Research prompt |
-| 4 | (optional) Human review of that prompt | Human |
-| 5 | Harvest | `nlm` Deep Research |
-| 6 | Later | Vet sources, Studio, etc. |
+| 2 | Classify ask + write scout brief | Host LLM |
+| 3 | Scout / decompose | Tavily (and/or Firecrawl) |
+| 4 | Read map from scout report | Host LLM |
+| 5 | Compose NotebookLM Deep Research prompt | Host LLM |
+| 6 | (optional) Human review of that prompt | Human |
+| 7 | Harvest | `nlm` Deep Research |
+| 8 | Later | Vet, Studio, etc. |
 
 ---
 
@@ -128,3 +162,4 @@ No `operators/` / `assembler/` / `gates/` unless we revive them on purpose and u
 |---|---|
 | 2026-09-10 | Initial outline: B+D now, E later, pre-research after CP0, no Obsidian |
 | 2026-09-10 | **Hard pivot:** LLM + Tavily/Firecrawl scout → LLM composes NotebookLM Deep Research prompt. Operators/assembler/gates dropped as the engine. Product is engineered LLM prompts. |
+| 2026-09-10 | **Sub-topic rule:** host LLM does not invent 5–7 parts; it classifies ask kind and briefs Tavily; syllabus comes from scout report. |
