@@ -31,6 +31,10 @@ Obsidian / vault export is **out of scope** for this repo’s first life. The no
 | All passes described inline | Pass index in the skill; bodies live under `prompts/` and are read on demand |
 | Highest leverage already known | Studio `--focus` prompts and research queries get the most design energy |
 
+## Project map
+
+Agents and humans: start at [`docs/OUTLINE.md`](docs/OUTLINE.md). Update it when the plan changes.
+
 ## Status
 
 **Rebuilding.**
