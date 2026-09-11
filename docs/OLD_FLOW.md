@@ -1,5 +1,7 @@
 # Old flow (`nlm-deep-dive`)
 
+**status:** exploratory
+
 What the private prototype skill did, and what “make it better” meant when we started `auto-nlm`.
 
 Source skill: `cuddy-five/agents` → `skills/nlm-deep-dive`.

@@ -16,8 +16,9 @@ If you change the story of the old skill, update `docs/OLD_FLOW.md` too.
 ## Locked direction (short)
 
 - **Current engine:** high-quality LLM + Tavily (dynamic search or deep research) and/or Firecrawl → LLM writes the NotebookLM Deep Research prompt.
-- **Sub-topics:** host LLM never invents the 5–7 part map; it classifies the *kind* of ask and briefs Tavily; names come from the scout report (`docs/OUTLINE.md`).
-- **Our job:** engineer those LLM prompts (`prompts/scout.md`, `prompts/compose-nlm-research.md`).
+- **Sub-topics:** host LLM never invents the part map; Tavily names the parts (`docs/OUTLINE.md`).
+- **Exploring:** pydantic classifications + short LLM instructions so the host can identify the query and pick a better Tavily path. Not locked.
+- **Our job:** engineer that handoff (`prompts/scout.md`, later compose). Keep docs fundamental while we explore.
 - **Not the engine:** operator algebra, assembler, Python FactPack, LangChain/LangGraph.
 - **Out of scope for now:** Obsidian/vault writeback.
 - **Deps:** do not install Tavily/Firecrawl until the user approves.

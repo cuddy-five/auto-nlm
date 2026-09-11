@@ -17,18 +17,20 @@ See `docs/OUTLINE.md` (current plan) and `docs/OLD_FLOW.md` (original skill).
 
 ## How prompts get built (current)
 
-1. Load `prompts/scout.md`. Classify the ask kind. Write a Tavily/Firecrawl brief that asks for a 5–7 part *fundamental* map — do **not** name those parts yourself.
-2. Run the scout. Read the report. The headings / parts *are* the sub-topics (trim if needed).
-3. Load `prompts/compose-nlm-research.md`. Write the NotebookLM Deep Research prompt from that map + scout evidence.
+1. Load `prompts/scout.md`. Classify the user query (we are exploring pydantic + short instructions). Write a Tavily brief — do **not** invent the sub-topic names.
+2. Run the scout. The report’s parts *are* the sub-topics.
+3. Load `prompts/compose-nlm-research.md` when it exists. Write the NotebookLM Deep Research prompt from that map + scout evidence.
 4. Prefer showing that prompt to the user before running `nlm` (until we say otherwise).
 5. Do **not** build operator stacks or invent the syllabus from training data.
+
+Classification and Tavily path-choice are **exploration** — see `docs/OUTLINE.md`. Do not treat any taxonomy as law.
 
 Those `prompts/*.md` files are the product. Keep this skill thin.
 
 ## Never
 
 - Skip reading `docs/OUTLINE.md` on a fresh session.
-- Invent 5–7 sub-topics from the model’s own knowledge before the scout returns. Classify the ask kind; brief Tavily to decompose; take the map from the report.
+- Invent the sub-topic map from the model’s own knowledge before the scout returns. Classify the query; brief Tavily; take the map from the report.
 - Call `nlm` Deep Research with a vague topic-only prompt if scout tools were available.
 - Add Tavily/Firecrawl dependencies without explicit user approval.
 - Write Obsidian/vault notes as part of this skill.
