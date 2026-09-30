@@ -28,3 +28,13 @@ If you change the story of the old skill, update `docs/OLD_FLOW.md` too.
 - Small slices. User commits and pushes.
 - No new dependencies without explicit user approval.
 - Do not treat chat history as more authoritative than `docs/OUTLINE.md`.
+
+## Cursor Cloud specific instructions
+
+This repo is prompts and docs. There is no lockfile, dev server, linter, or test suite. The default image is enough; do not add a Dockerfile for it.
+
+The environment `install` command is the health check. From the repo root it confirms `README.md`, `SKILL.md`, `AGENTS.md`, `docs/OUTLINE.md`, `docs/OLD_FLOW.md`, `prompts/README.md`, and `prompts/scout.md` exist, and that `prompts/scout.md` still says the host does not invent the sub-topic map. Re-run that check after editing those files.
+
+`prompts/compose-nlm-research.md` is not in the repo yet. That absence is expected.
+
+Do not install Tavily, Firecrawl, or the NotebookLM CLI (`nlm`) as part of environment setup. Those wait for an explicit approval. `nlm` also needs a Google login, which this environment does not store.
